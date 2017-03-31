@@ -148,7 +148,7 @@ class EspressoRunner {
 			client.updateInstrumentationTestSuite(team, project, testSuite, appApk, testApk, request);
 			log.info(String.format("Uploaded appAPK : %s and testAPK : %s", appApk.getAbsolutePath(), testApk.getAbsolutePath()));
 		} catch (Exception e) {
-			throw new RuntimeException(String.format("Unable to update testSuite %s", testSuite), e);
+			throw new RuntimeException("Unable to update testSuite %s" + testSuite, e);
 		}
 	}
 
@@ -176,8 +176,7 @@ class EspressoRunner {
 		for (TestSuiteReport.ReportEntry reportEntry : suiteReport.getReports()) {
 			String testName = getTestName(suiteReport, reportEntry.getKey().getTestId());
 			String deviceId = reportEntry.getKey().getDeviceId();
-			list.append(String.format("%s - %s .............  %s", testName, deviceId, reportEntry.getView().getStatus().toString()));
-			list.append("\n");
+			list.append(String.format("%s - %s .............  %s%n", testName, deviceId, reportEntry.getView().getStatus().toString()));
 		}
 		return list.toString();
 	}
