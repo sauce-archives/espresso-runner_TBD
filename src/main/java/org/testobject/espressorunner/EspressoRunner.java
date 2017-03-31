@@ -4,10 +4,16 @@ import com.beust.jcommander.*;
 
 import java.util.List;
 
-public class EspressoRunner
-{
+public class EspressoRunner {
+
+    @Parameter(names = "--app", description = "Path to APK of app under test", validateWith = RequiredValidator.class)
+    private String appApk = getEnvDefault("APP");
+
+    @Parameter(names = "--test", description = "Path to test APK", validateWith = RequiredValidator.class)
+    private String testApk = getEnvDefault("TEST");
+
     @Parameter(names = "--url")
-    private String baseUrl = "https://app.testobject.com/api/rest";
+    private String baseUrl = getEnvDefault("URL", "https://app.testobject.com/api/rest");
 
     @Parameter(names = {"--username", "-u"}, validateWith = RequiredValidator.class)
     private String username = getEnvDefault("USER");
@@ -18,8 +24,8 @@ public class EspressoRunner
     @Parameter(names = {"--team", "-t"})
     private String team = getEnvDefault("TEAM");
 
-    @Parameter(names = {"--app", "-a"}, validateWith = RequiredValidator.class)
-    private String app = getEnvDefault("APP");
+    @Parameter(names = {"--project", "-p"}, validateWith = RequiredValidator.class)
+    private String app = getEnvDefault("project");
 
     @Parameter(names = {"--suite", "-s"})
     private Long testSuite = Long.parseLong(getEnvDefault("SUITE"));
