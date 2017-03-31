@@ -17,7 +17,7 @@ public class EspressoRunner {
 
         try {
             TestObjectTestServer testObjectTestServer = new TestObjectTestServer(config);
-            testObjectTestServer.runTests();
+            testObjectTestServer.executeTests();
         } catch (Throwable t) {
             log.error("Uncaught error", t);
         }

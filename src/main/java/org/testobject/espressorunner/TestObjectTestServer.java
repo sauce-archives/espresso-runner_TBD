@@ -14,7 +14,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 // TODO: Better name for this class
@@ -30,54 +29,40 @@ class TestObjectTestServer {
 		log.debug(prettyConfig);
 	}
 
-	void runTests() throws TestFailedException {
-		String baseUrl = config.getBaseUrl();
-		TestObjectClient client = TestObjectClient.Factory.create(baseUrl, getProxySettings());
-
-		String project = config.getProject();
-		Long testSuite = config.getTestSuite();
-		String team = config.getTeam();
-		List<String> methodsToRun = config.getTests();
-		List<String> classesToRun = config.getClasses();
-		List<String> annotationsToRun = config.getAnnotations();
-		List<String> sizesToRun = config.getSizes();
-		int checkFrequency = config.getCheckFrequency();
-
-		boolean runAsPackage = config.getRunAsPackage();
-
-		TestSuiteResource.InstrumentationTestSuiteRequest instrumentationTestSuiteRequest = new TestSuiteResource.InstrumentationTestSuiteRequest(
-				runAsPackage);
-		instrumentationTestSuiteRequest.methodsToRun = methodsToRun;
-		instrumentationTestSuiteRequest.annotationsToRun = annotationsToRun;
-		instrumentationTestSuiteRequest.classesToRun = classesToRun;
-		instrumentationTestSuiteRequest.sizesToRun = sizesToRun;
-
+	void executeTests() throws TestFailedException {
+		TestObjectClient client = createClient();
+		TestSuiteResource.InstrumentationTestSuiteRequest instrumentationTestSuiteRequest = createSuiteRequest();
 		login(client, config.getUsername(), config.getPassword());
-
-		updateInstrumentationSuite(config.getTestApk(), config.getAppApk(), client, team, project, testSuite, instrumentationTestSuiteRequest);
+		updateInstrumentationSuite(client, instrumentationTestSuiteRequest);
 
 		Instant start = Instant.now();
-
-		long suiteReportId = client.startInstrumentationTestSuite(team, project, testSuite);
-
-		TestSuiteReport suiteReport = client
-				.waitForSuiteReport(team, project, suiteReportId, TimeUnit.MINUTES.toMillis(config.getTestTimeout()),
-						TimeUnit.SECONDS.toMillis(checkFrequency));
-
-		try {
-			writeSuiteReportXML(client, team, project, suiteReportId);
-		} catch (IOException e) {
-			log.warn("Failed to write test report to XML", e);
-		}
-
+		TestSuiteReport suiteReport = runTests(client);
 		Instant end = Instant.now();
 
 		Duration executionTime = Duration.between(start, end);
 
 		int errors = countErrors(suiteReport);
+		String message = printResults(suiteReport, executionTime, errors);
+
+		if (errors == 0) {
+			log.info(message);
+		} else if (config.getFailOnError()) {
+			throw new TestFailedException("failure during test suite execution of test suite " + config.getTestSuite(),
+					new Exception(message));
+		} else {
+			log.warn(message);
+		}
+	}
+
+	private String printResults(TestSuiteReport suiteReport, Duration executionTime, int errors) {
+		String baseUrl = config.getBaseUrl();
+		String team = config.getTeam();
+		String project = config.getProject();
+		Long suite = config.getTestSuite();
+		Long suiteReportId = suiteReport.getId();
 		String downloadURL = String.format("%s/users/%s/projects/%s/automationReports/%d/download/zip", baseUrl, team, project, suiteReportId);
 		String reportURL = String
-				.format("%s/#/%s/%s/espresso/%d/reports/%d", baseUrl.replace("/api/rest", ""), team, project, testSuite, suiteReportId);
+				.format("%s/#/%s/%s/espresso/%d/reports/%d", baseUrl.replace("/api/rest", ""), team, project, suite, suiteReportId);
 
 		StringBuilder msg = new StringBuilder();
 
@@ -95,18 +80,44 @@ class TestObjectTestServer {
 		msg.append(String.format("DownloadZIP URL: '%s'%n", downloadURL));
 		msg.append(String.format("Report URL : '%s'", reportURL));
 
-		if (errors == 0) {
-			log.info(msg.toString());
-		} else {
-			if (config.getFailOnError()) {
-				throw new TestFailedException("failure during test suite execution of test suite " + testSuite,
-						new Exception(msg.toString()));
-			}
+		return msg.toString();
+	}
+
+	private TestSuiteReport runTests(TestObjectClient client) {
+		String team = config.getTeam();
+		String project = config.getProject();
+		Long testSuite = config.getTestSuite();
+		long suiteReportId = client.startInstrumentationTestSuite(team, project, testSuite);
+		TestSuiteReport suiteReport = client
+				.waitForSuiteReport(team, project, suiteReportId, TimeUnit.MINUTES.toMillis(config.getTestTimeout()),
+						TimeUnit.SECONDS.toMillis(config.getCheckFrequency()));
+		try {
+			writeSuiteReportXML(client, team, project, suiteReportId);
+		} catch (IOException e) {
+			log.warn("Failed to write test report to XML", e);
 		}
+		return suiteReport;
+	}
+
+	private TestObjectClient createClient() {
+		TestObjectClient.ProxySettings proxySettings = getProxySettings();
+		String baseUrl = config.getBaseUrl();
+		return TestObjectClient.Factory.create(baseUrl, proxySettings);
+	}
+
+	private TestSuiteResource.InstrumentationTestSuiteRequest createSuiteRequest() {
+		TestSuiteResource.InstrumentationTestSuiteRequest request = new TestSuiteResource.InstrumentationTestSuiteRequest(
+				config.getRunAsPackage());
+		request.methodsToRun = config.getTests();
+		request.annotationsToRun = config.getAnnotations();
+		request.classesToRun = config.getClasses();
+		request.sizesToRun = config.getSizes();
+
+		return request;
 	}
 
 	private void writeSuiteReportXML(TestObjectClient client, String user, String app, long suiteReportId) throws IOException {
-		Path localDirectory = Paths.get("testobject");
+		Path localDirectory = Paths.get(".");
 
 		String filename = user + "-" + app + "-" + suiteReportId + ".xml";
 		String xml = client.readTestSuiteXMLReport(user, app, suiteReportId);
@@ -128,11 +139,15 @@ class TestObjectTestServer {
 		}
 	}
 
-	private void updateInstrumentationSuite(File testApk, File appAk, TestObjectClient client, String team, String app, Long testSuite,
-			TestSuiteResource.InstrumentationTestSuiteRequest request) {
+	private void updateInstrumentationSuite(TestObjectClient client, TestSuiteResource.InstrumentationTestSuiteRequest request) {
+		File testApk = config.getTestApk();
+		File appApk = config.getAppApk();
+		String team = config.getTeam();
+		Long testSuite = config.getTestSuite();
+		String project = config.getProject();
 		try {
-			client.updateInstrumentationTestSuite(team, app, testSuite, appAk, testApk, request);
-			log.info(String.format("Uploaded appAPK : %s and testAPK : %s", appAk.getAbsolutePath(), testApk.getAbsolutePath()));
+			client.updateInstrumentationTestSuite(team, project, testSuite, appApk, testApk, request);
+			log.info(String.format("Uploaded appAPK : %s and testAPK : %s", appApk.getAbsolutePath(), testApk.getAbsolutePath()));
 		} catch (Exception e) {
 			throw new RuntimeException(String.format("unable to update testSuite %s", testSuite), e);
 		}
