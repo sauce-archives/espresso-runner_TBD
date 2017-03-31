@@ -10,6 +10,12 @@ import java.util.List;
 
 class Configuration {
 
+	@Parameter(names = {"--help", "-h", "-?"}, help = true)
+	private boolean help = false;
+
+	@Parameter(names = "--verbosity")
+	private String verbosity = getEnvDefault("VERBOSITY", "INFO");
+
 	@Parameter(names = "--app", description = "Path to APK of app under test", validateWith = RequiredValidator.class)
 	private String appApk = getEnvDefault("APP");
 
@@ -147,6 +153,10 @@ class Configuration {
 
 	public String getProject() {
 		return project;
+	}
+
+	public String getVerbosity() {
+		return verbosity;
 	}
 
 	private class RequiredValidator implements IParameterValidator {

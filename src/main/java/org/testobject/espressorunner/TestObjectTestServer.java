@@ -1,5 +1,6 @@
 package org.testobject.espressorunner;
 
+import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testobject.api.TestObjectClient;
@@ -16,6 +17,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+// TODO: Better name for this class
 class TestObjectTestServer {
 
 	private static final Logger log = LoggerFactory.getLogger(TestObjectTestServer.class);
@@ -23,6 +25,8 @@ class TestObjectTestServer {
 
 	TestObjectTestServer(Configuration config) {
 		this.config = config;
+		log.info("TestObjectTestServer started");
+		log.debug(new Gson().toJson(config));
 	}
 
 	void runTests() throws TestFailedException {
