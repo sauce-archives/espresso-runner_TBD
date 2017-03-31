@@ -1,28 +1,57 @@
 package org.testobject.espressorunner;
 
 import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ConfigurationTest {
 	private Configuration configuration;
 
 	@Test
-	void testUsernamePassword() {
+	void testRequiredArgs() {
 		String username = "test";
 		String password = "asdfasdfasdfasdfasdfasdf";
 		main("--username", username, "--password", password);
 
-		assertEquals(username, configuration.getUsername());
-		assertEquals(password, configuration.getPassword());
+		assertEquals(configuration.getUsername(), username);
+		assertEquals(configuration.getPassword(), password);
 	}
 
 	@Test
-	void testApk() {
-		main();
+	void testMissingRequiredArgs() {
+		assertThrows(ParameterException.class, this::main);
+	}
 
-		configuration.getAppApk();
+	@Test
+	void testEnvironmentDefault() {
+		String defaultName = "default";
+		configuration = new Configuration() {
+			@Override
+			String getEnvDefault(String option) {
+				return defaultName;
+			}
+		};
+		new JCommander(configuration);
+
+		assertEquals(defaultName, configuration.getUsername());
+	}
+
+	@Test
+	void testEnvironmentDefaultOverridden() {
+		String defaultName = "default";
+		configuration = new Configuration() {
+			@Override
+			String getEnvDefault(String option) {
+				return defaultName;
+			}
+		};
+		String overriddenName = "override";
+		new JCommander(configuration, "--username", overriddenName);
+
+		assertEquals(overriddenName, configuration.getUsername());
 	}
 
 	private void main(String... args) {

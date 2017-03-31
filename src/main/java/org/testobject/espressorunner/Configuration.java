@@ -67,12 +67,12 @@ class Configuration {
 	@Parameter(names = "--runAsPackage")
 	private boolean runAsPackage = Boolean.parseBoolean(getEnvDefault("RUN_AS_PACKAGE", "false"));
 
-	private static String getEnvDefault(String option, String fallback) {
+	String getEnvDefault(String option, String fallback) {
 		String value = System.getenv(option);
 		return Strings.isStringEmpty(value) ? fallback : value;
 	}
 
-	private static String getEnvDefault(String option) {
+	String getEnvDefault(String option) {
 		return getEnvDefault(option, null);
 	}
 
@@ -82,7 +82,7 @@ class Configuration {
 	 * @param option Name of the environment variable
 	 * @return The value for the environment variable or null if none exists
 	 */
-	private static Long getEnvDefaultLong(String option) {
+	private Long getEnvDefaultLong(String option) {
 		String value = getEnvDefault(option, null);
 		return value == null ? null : Long.parseLong(value);
 	}
