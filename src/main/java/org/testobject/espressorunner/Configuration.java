@@ -159,7 +159,7 @@ class Configuration {
 		return verbosity;
 	}
 
-	private class RequiredValidator implements IParameterValidator {
+	public static class RequiredValidator implements IParameterValidator {
 		public void validate(String name, String value) throws ParameterException {
 			if (Strings.isStringEmpty(value)) {
 				throw new ParameterException("Missing value for parameter " + name);
