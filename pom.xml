@@ -41,9 +41,19 @@
 
   <dependencies>
     <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.2.2</version>
+    </dependency>
+    <dependency>
       <groupId>com.beust</groupId>
       <artifactId>jcommander</artifactId>
       <version>1.60</version>
+    </dependency>
+    <dependency>
+      <groupId>org.testobject</groupId>
+      <artifactId>testobject-java-api</artifactId>
+      <version>0.0.26</version>
     </dependency>
 
     <dependency>
