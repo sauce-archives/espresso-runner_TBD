@@ -16,30 +16,26 @@ import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class TestObjectTestServer {
+class TestObjectTestServer {
 
 	private static final Logger log = LoggerFactory.getLogger(TestObjectTestServer.class);
 	private final Configuration config;
 
-	public TestObjectTestServer(Configuration config) {
+	TestObjectTestServer(Configuration config) {
 		this.config = config;
 	}
 
-	public void uploadApks() throws TestFailedException {
+	void runTests() throws TestFailedException {
 		String baseUrl = config.getBaseUrl();
 		TestObjectClient client = TestObjectClient.Factory.create(baseUrl, getProxySettings());
 
-		String username = config.getUsername();
-		String password = config.getPassword();
-		String app = config.getProject();
+		String project = config.getProject();
 		Long testSuite = config.getTestSuite();
 		String team = config.getTeam();
 		List<String> methodsToRun = config.getTests();
 		List<String> classesToRun = config.getClasses();
 		List<String> annotationsToRun = config.getAnnotations();
 		List<String> sizesToRun = config.getSizes();
-		boolean failOnUnknown = config.getFailOnUnknown();
-		int testTimeout = config.getTestTimeout();
 		int checkFrequency = config.getCheckFrequency();
 
 		boolean runAsPackage = config.getRunAsPackage();
@@ -51,20 +47,20 @@ public class TestObjectTestServer {
 		instrumentationTestSuiteRequest.classesToRun = classesToRun;
 		instrumentationTestSuiteRequest.sizesToRun = sizesToRun;
 
-		login(client, username, password);
+		login(client, config.getUsername(), config.getPassword());
 
-		updateInstrumentationSuite(config.getTestApk(), config.getAppApk(), client, team, app, testSuite, instrumentationTestSuiteRequest);
+		updateInstrumentationSuite(config.getTestApk(), config.getAppApk(), client, team, project, testSuite, instrumentationTestSuiteRequest);
 
 		Instant start = Instant.now();
 
-		long suiteReportId = client.startInstrumentationTestSuite(team, app, testSuite);
+		long suiteReportId = client.startInstrumentationTestSuite(team, project, testSuite);
 
 		TestSuiteReport suiteReport = client
-				.waitForSuiteReport(team, app, suiteReportId, TimeUnit.MINUTES.toMillis(testTimeout),
+				.waitForSuiteReport(team, project, suiteReportId, TimeUnit.MINUTES.toMillis(config.getTestTimeout()),
 						TimeUnit.SECONDS.toMillis(checkFrequency));
 
 		try {
-			writeSuiteReportXML(client, team, app, suiteReportId);
+			writeSuiteReportXML(client, team, project, suiteReportId);
 		} catch (IOException e) {
 			log.warn("Failed to write test report to XML", e);
 		}
@@ -73,32 +69,25 @@ public class TestObjectTestServer {
 
 		Duration executionTime = Duration.between(start, end);
 
-		int errors = countErrors(suiteReport, failOnUnknown);
-		String downloadURL = String.format("%s/users/%s/projects/%s/automationReports/%d/download/zip", baseUrl, team, app, suiteReportId);
+		int errors = countErrors(suiteReport);
+		String downloadURL = String.format("%s/users/%s/projects/%s/automationReports/%d/download/zip", baseUrl, team, project, suiteReportId);
 		String reportURL = String
-				.format("%s/#/%s/%s/espresso/%d/reports/%d", baseUrl.replace("/api/rest", ""), team, app, testSuite, suiteReportId);
+				.format("%s/#/%s/%s/espresso/%d/reports/%d", baseUrl.replace("/api/rest", ""), team, project, testSuite, suiteReportId);
 
 		StringBuilder msg = new StringBuilder();
 
-		msg.append("\n");
-		msg.append(getTestsList(suiteReport));
-		msg.append("----------------------------------------------------------------------------------");
-		msg.append("\n");
-		msg.append(String.format("Ran %d tests in %s", suiteReport
+		msg.append(String.format("%n%s", getTestsList(suiteReport)));
+		msg.append("----------------------------------------------------------------------------------%n");
+		msg.append(String.format("Ran %d tests in %ss%n", suiteReport
 				.getReports().size(), executionTime.getSeconds()));
-		msg.append("\n");
-		msg.append(suiteReport.getStatus());
-		msg.append("\n");
+		msg.append(String.format("%s%n", suiteReport.getStatus()));
 
 		if (errors > 0) {
-			msg.append(String.format("List of failed Test (Total errors : %d)", errors));
-			msg.append("\n");
-			msg.append(failedTestsList(suiteReport, reportURL));
-			msg.append("\n");
+			msg.append(String.format("List of failed Test (Total errors : %d)%n", errors));
+			msg.append(String.format("%s%n", failedTestsList(suiteReport, reportURL)));
 		}
 
-		msg.append(String.format("DownloadZIP URL: '%s'", downloadURL));
-		msg.append("\n");
+		msg.append(String.format("DownloadZIP URL: '%s'%n", downloadURL));
 		msg.append(String.format("Report URL : '%s'", reportURL));
 
 		if (errors == 0) {
@@ -144,18 +133,18 @@ public class TestObjectTestServer {
 		}
 	}
 
-	private static int countErrors(TestSuiteReport suiteReport, boolean failOnUnknown) {
+	private int countErrors(TestSuiteReport suiteReport) {
 		int errors = 0;
 		for (TestSuiteReport.ReportEntry reportEntry : suiteReport.getReports()) {
-			if (isFailed(reportEntry, failOnUnknown)) {
+			if (isFailed(reportEntry)) {
 				errors++;
 			}
 		}
 		return errors;
 	}
 
-	private static boolean isFailed(TestSuiteReport.ReportEntry reportEntry, boolean failOnUnknown) {
-		if (failOnUnknown) {
+	private boolean isFailed(TestSuiteReport.ReportEntry reportEntry) {
+		if (config.getFailOnUnknown()) {
 			return reportEntry.getView().getStatus() == TestSuiteReport.Status.FAILURE
 					|| reportEntry.getView().getStatus() == TestSuiteReport.Status.UNKNOWN;
 		} else {
@@ -182,8 +171,7 @@ public class TestObjectTestServer {
 				String deviceId = reportEntry.getKey().getDeviceId();
 				String url = String.format("%s/executions/%d",
 						baseReportUrl, reportEntry.getView().getReportId());
-				list.append(String.format("%s - %s ....  %s", testName, deviceId, url));
-				list.append("\n");
+				list.append(String.format("%s - %s ....  %s%n", testName, deviceId, url));
 			}
 		}
 		return list.toString();
@@ -208,7 +196,7 @@ public class TestObjectTestServer {
 				: null;
 	}
 
-	private class TestFailedException extends Throwable {
+	class TestFailedException extends RuntimeException {
 		TestFailedException(String reason, Exception e) {
 			super(reason, e);
 		}

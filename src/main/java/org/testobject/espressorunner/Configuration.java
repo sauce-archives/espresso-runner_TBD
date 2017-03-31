@@ -29,10 +29,10 @@ class Configuration {
 	private String team = getEnvDefault("TEAM");
 
 	@Parameter(names = "--project", validateWith = RequiredValidator.class)
-	private String project = getEnvDefault("project");
+	private String project = getEnvDefault("PROJECT");
 
-	@Parameter(names = "--suite")
-	private Long testSuite = Long.parseLong(getEnvDefault("SUITE"));
+	@Parameter(names = "--suite", validateWith = RequiredValidator.class)
+	private Long testSuite = getEnvDefaultLong("SUITE");
 
 	@Parameter(names = "--tests", variableArity = true)
 	private List<String> tests;
@@ -46,7 +46,7 @@ class Configuration {
 	@Parameter(names = "--sizes", variableArity = true)
 	private List<String> sizes;
 
-	@Parameter(names = "--timeout")
+	@Parameter(names = "--timeout", description = "Test timeout in minutes (default: 60)")
 	private int testTimeout = Integer.parseInt(getEnvDefault("TIMEOUT", "60"));
 
 	@Parameter(names = "--checkFrequency")
@@ -63,11 +63,22 @@ class Configuration {
 
 	private String getEnvDefault(String option, String fallback) {
 		String value = System.getenv(option);
-		return Strings.isStringEmpty(option) ? fallback : value;
+		return Strings.isStringEmpty(value) ? fallback : value;
 	}
 
 	private String getEnvDefault(String option) {
 		return getEnvDefault(option, null);
+	}
+
+	/**
+	 * Given the name of an environment variable, reads the value for it, and either returns null if it doesn't exist or returns the value
+	 * converted to a Long
+	 * @param option Name of the environment variable
+	 * @return The value for the environment variable or null if none exists
+	 */
+	private Long getEnvDefaultLong(String option) {
+		String value = getEnvDefault(option, null);
+		return value == null ? null : Long.parseLong(value);
 	}
 
 	public String getBaseUrl() {

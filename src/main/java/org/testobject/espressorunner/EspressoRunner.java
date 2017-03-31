@@ -8,6 +8,7 @@ public class EspressoRunner {
         Configuration config = new Configuration();
         new JCommander(config, args);
         TestObjectTestServer testObjectTestServer = new TestObjectTestServer(config);
+        testObjectTestServer.runTests();
     }
 
 }
