@@ -7,14 +7,20 @@ import org.slf4j.LoggerFactory;
 
 public class EspressoRunner {
 
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(TestObjectTestServer.class);
+
     public static void main(String... args) {
         Configuration config = new Configuration();
         new JCommander(config, args);
 
         setLogLevel(config.getVerbosity());
 
-        TestObjectTestServer testObjectTestServer = new TestObjectTestServer(config);
-        testObjectTestServer.runTests();
+        try {
+            TestObjectTestServer testObjectTestServer = new TestObjectTestServer(config);
+            testObjectTestServer.runTests();
+        } catch (Throwable t) {
+            log.error("Uncaught error", t);
+        }
     }
 
     private static void setLogLevel(String level) {

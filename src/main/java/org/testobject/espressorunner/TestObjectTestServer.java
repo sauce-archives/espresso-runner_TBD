@@ -1,6 +1,6 @@
 package org.testobject.espressorunner;
 
-import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testobject.api.TestObjectClient;
@@ -26,7 +26,8 @@ class TestObjectTestServer {
 	TestObjectTestServer(Configuration config) {
 		this.config = config;
 		log.info("TestObjectTestServer started");
-		log.debug(new Gson().toJson(config));
+		String prettyConfig = new GsonBuilder().setPrettyPrinting().create().toJson(config);
+		log.debug(prettyConfig);
 	}
 
 	void runTests() throws TestFailedException {
