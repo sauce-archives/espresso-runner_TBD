@@ -18,6 +18,13 @@ class ConfigurationTest {
 		assertEquals(password, configuration.getPassword());
 	}
 
+	@Test
+	void testApk() {
+		main();
+
+		configuration.getAppApk();
+	}
+
 	private void main(String... args) {
 		configuration = new Configuration();
 		new JCommander(configuration, args);

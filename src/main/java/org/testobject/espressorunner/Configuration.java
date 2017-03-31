@@ -26,7 +26,7 @@ class Configuration {
 	private String baseUrl = getEnvDefault("URL", "https://app.testobject.com/api/rest");
 
 	@Parameter(names = "--username", validateWith = RequiredValidator.class)
-	private String username = getEnvDefault("USER");
+	private String username = getEnvDefault("USER_NAME");
 
 	@Parameter(names = "--password", validateWith = RequiredValidator.class)
 	private String password = getEnvDefault("PASSWORD");
@@ -40,16 +40,16 @@ class Configuration {
 	@Parameter(names = "--suite", validateWith = RequiredValidator.class)
 	private Long testSuite = getEnvDefaultLong("SUITE");
 
-	@Parameter(names = "--tests", variableArity = true)
+	@Parameter(names = "--testsToRun", variableArity = true)
 	private List<String> tests;
 
-	@Parameter(names = "--classes", variableArity = true)
+	@Parameter(names = "--classesToRun", variableArity = true)
 	private List<String> classes;
 
-	@Parameter(names = "--annotations", variableArity = true)
+	@Parameter(names = "--annotationsToRun", variableArity = true)
 	private List<String> annotations;
 
-	@Parameter(names = "--sizes", variableArity = true)
+	@Parameter(names = "--sizesToRun", variableArity = true)
 	private List<String> sizes;
 
 	@Parameter(names = "--timeout", description = "Test timeout in minutes (default: 60)")
@@ -67,12 +67,12 @@ class Configuration {
 	@Parameter(names = "--runAsPackage")
 	private boolean runAsPackage = Boolean.parseBoolean(getEnvDefault("RUN_AS_PACKAGE", "false"));
 
-	private String getEnvDefault(String option, String fallback) {
+	private static String getEnvDefault(String option, String fallback) {
 		String value = System.getenv(option);
 		return Strings.isStringEmpty(value) ? fallback : value;
 	}
 
-	private String getEnvDefault(String option) {
+	private static String getEnvDefault(String option) {
 		return getEnvDefault(option, null);
 	}
 
@@ -82,7 +82,7 @@ class Configuration {
 	 * @param option Name of the environment variable
 	 * @return The value for the environment variable or null if none exists
 	 */
-	private Long getEnvDefaultLong(String option) {
+	private static Long getEnvDefaultLong(String option) {
 		String value = getEnvDefault(option, null);
 		return value == null ? null : Long.parseLong(value);
 	}
