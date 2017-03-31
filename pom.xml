@@ -31,7 +31,7 @@
             <configuration>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>org.testobject.espressorunner.EspressoRunner</mainClass>
+                  <mainClass>org.testobject.espressorunner.Main</mainClass>
                 </transformer>
               </transformers>
             </configuration>

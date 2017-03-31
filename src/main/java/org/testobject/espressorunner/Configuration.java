@@ -15,7 +15,7 @@ class Configuration {
 	@Parameter(names = {"--help", "-h", "-?"}, help = true)
 	private boolean help = false;
 
-	@Parameter(names = "--verbosity")
+	@Parameter(names = "--verbosity", description = "Logging level. INFO is default.")
 	private String verbosity = getEnvDefault("VERBOSITY", "INFO");
 
 	@Parameter(names = "--app", description = "Path to APK of app under test", validateWith = RequiredValidator.class)
