@@ -11,15 +11,20 @@ public class Main {
 
     public static void main(String... args) {
         Configuration config = new Configuration();
-        new JCommander(config, args);
+        JCommander jc = new JCommander(config, args);
+        jc.setProgramName("espressorunner.jar");
 
         setLogLevel(config.getVerbosity());
 
-        try {
-            EspressoRunner espressoRunner = new EspressoRunner(config);
-            espressoRunner.executeTests();
-        } catch (Throwable t) {
-            log.error("Uncaught error", t);
+        if (config.getHelpRequested()) {
+            jc.usage();
+        } else {
+            try {
+                EspressoRunner espressoRunner = new EspressoRunner(config);
+                espressoRunner.executeTests();
+            } catch (Throwable t) {
+                log.error("Uncaught error", t);
+            }
         }
     }
 

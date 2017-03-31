@@ -15,8 +15,8 @@ java -jar espresso-runner.jar \
     --suites 1
 ```
 
-For additional options, try `java -jar espresso-runner.jar --help`.
+For additional options, try `java -jar espressorunner.jar --help`.
 
 ## Building
 
-Run `mvn package` to create a `target/espresso-runner.jar` file.
+Run `mvn package` to create a `target/espressorunner.jar` file.

@@ -27,7 +27,7 @@ class EspressoRunner {
 		this.config = config;
 		log.info("EspressoRunner initialized.");
 		String prettyConfig = gson.toJson(config);
-		log.debug("Server config: " + prettyConfig);
+		log.debug("Configuration: " + prettyConfig);
 	}
 
 	void executeTests() throws TestFailedException {
