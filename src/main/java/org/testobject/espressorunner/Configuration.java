@@ -6,6 +6,8 @@ import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Strings;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 class Configuration {
@@ -66,6 +68,9 @@ class Configuration {
 
 	@Parameter(names = "--runAsPackage")
 	private boolean runAsPackage = Boolean.parseBoolean(getEnvDefault("RUN_AS_PACKAGE", "false"));
+
+	@Parameter(names = "--xmlFolder")
+	private String outputXml = getEnvDefault("xmlFolder", ".");
 
 	String getEnvDefault(String option, String fallback) {
 		String value = System.getenv(option);
@@ -157,6 +162,10 @@ class Configuration {
 
 	public String getVerbosity() {
 		return verbosity;
+	}
+
+	public Path getXmlFolder() {
+		return Paths.get(outputXml);
 	}
 
 	public static class RequiredValidator implements IParameterValidator {

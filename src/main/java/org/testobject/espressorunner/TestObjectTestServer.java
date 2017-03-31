@@ -1,5 +1,6 @@
 package org.testobject.espressorunner;
 
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +12,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
@@ -20,13 +20,14 @@ import java.util.concurrent.TimeUnit;
 class TestObjectTestServer {
 
 	private static final Logger log = LoggerFactory.getLogger(TestObjectTestServer.class);
+	private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 	private final Configuration config;
 
 	TestObjectTestServer(Configuration config) {
 		this.config = config;
 		log.info("TestObjectTestServer started");
-		String prettyConfig = new GsonBuilder().setPrettyPrinting().create().toJson(config);
-		log.debug(prettyConfig);
+		String prettyConfig = gson.toJson(config);
+		log.debug("Server config: " + prettyConfig);
 	}
 
 	void executeTests() throws TestFailedException {
@@ -38,7 +39,6 @@ class TestObjectTestServer {
 		Instant start = Instant.now();
 		TestSuiteReport suiteReport = runTests(client);
 		Instant end = Instant.now();
-
 		Duration executionTime = Duration.between(start, end);
 
 		int errors = countErrors(suiteReport);
@@ -113,29 +113,28 @@ class TestObjectTestServer {
 		request.classesToRun = config.getClasses();
 		request.sizesToRun = config.getSizes();
 
+		log.debug("InstrumentationTestSuiteRequest created: " + gson.toJson(request));
+
 		return request;
 	}
 
 	private void writeSuiteReportXML(TestObjectClient client, String user, String app, long suiteReportId) throws IOException {
-		Path localDirectory = Paths.get(".");
+		Path xmlFolder = config.getXmlFolder();
 
 		String filename = user + "-" + app + "-" + suiteReportId + ".xml";
 		String xml = client.readTestSuiteXMLReport(user, app, suiteReportId);
-		if (!Files.isDirectory(localDirectory)) {
-			Files.createDirectory(localDirectory);
-		}
+		Files.createDirectories(xmlFolder);
 
-		Files.write(localDirectory.resolve(filename), xml.getBytes());
-		log.info("Wrote XML report to '" + filename + "'");
+		Path xmlFile = Files.write(xmlFolder.resolve(filename), xml.getBytes());
+		log.info("Wrote XML report to '" + xmlFile + "'");
 	}
 
 	private void login(TestObjectClient client, String user, String password) {
 		try {
 			client.login(user, password);
-
-			log.info(String.format("user %s successfully logged in", user));
+			log.info("User " + user + " successfully logged in");
 		} catch (Exception e) {
-			throw new RuntimeException(String.format("unable to login user %s", user), e);
+			throw new RuntimeException(String.format("Unable to login user %s", user), e);
 		}
 	}
 
@@ -149,7 +148,7 @@ class TestObjectTestServer {
 			client.updateInstrumentationTestSuite(team, project, testSuite, appApk, testApk, request);
 			log.info(String.format("Uploaded appAPK : %s and testAPK : %s", appApk.getAbsolutePath(), testApk.getAbsolutePath()));
 		} catch (Exception e) {
-			throw new RuntimeException(String.format("unable to update testSuite %s", testSuite), e);
+			throw new RuntimeException(String.format("Unable to update testSuite %s", testSuite), e);
 		}
 	}
 
