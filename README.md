@@ -12,7 +12,8 @@ java -jar espresso-runner.jar \
     --test path/to/test.apk \
     --username testObjectUsername \
     --password testObjectPassword \
-    --suites 1
+    --project projectName \
+    --suite 1
 ```
 
 For additional options, try `java -jar espressorunner.jar --help`.

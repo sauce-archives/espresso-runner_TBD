@@ -1,59 +1,68 @@
 package org.testobject.espressorunner;
 
 import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ConfigurationTest {
 	private Configuration configuration;
 
+	private String mockTest = "test";
+	private String mockApp = "app";
+	private String mockUsername = "username";
+	private String mockPassword = "password";
+	private String mockProject = "project";
+	private String mockSuite = "12";
+	private String[] mockArgs = new String[] { "--test", mockTest, "--app", mockApp, "--suite", mockSuite, "--username", mockUsername,
+			"--password", mockPassword, "--project", mockProject };
+
 	@Test
 	void testRequiredArgs() {
-		String username = "test";
-		String password = "asdfasdfasdfasdfasdfasdf";
-		main("--username", username, "--password", password);
+		main(mockArgs);
 
-		assertEquals(configuration.getUsername(), username);
-		assertEquals(configuration.getPassword(), password);
+		assertEquals(configuration.getTestApk().toString(), mockTest);
+		assertEquals(configuration.getUsername(), mockUsername);
+		assertEquals(configuration.getPassword(), mockPassword);
+		assertEquals(configuration.getProject(), mockProject);
+		Long suiteLong = Long.parseLong(mockSuite);
+		assertEquals(configuration.getTestSuite(), suiteLong);
 	}
 
 	@Test
 	void testMissingRequiredArgs() {
-		//assertThrows(ParameterException.class, this::main);
+		assertThrows(ParameterException.class, this::main);
 	}
 
 	@Test
-	void testEnvironmentDefault() {
-		String defaultName = "default";
-		configuration = new Configuration() {
-			@Override
-			String getEnvDefault(String option) {
-				return defaultName;
-			}
-		};
-		new JCommander(configuration);
+	void testDefault() {
+		main(mockArgs);
 
-		assertEquals(defaultName, configuration.getUsername());
+		assertEquals(Configuration.ENVIRONMENT_DEFAULTS.getDefaultValueFor("--url"), configuration.getBaseUrl());
 	}
 
 	@Test
-	void testEnvironmentDefaultOverridden() {
-		String defaultName = "default";
-		configuration = new Configuration() {
-			@Override
-			String getEnvDefault(String option) {
-				return defaultName;
-			}
-		};
-		String overriddenName = "override";
-		new JCommander(configuration, "--username", overriddenName);
+	void testDefaultOverridden() {
+		String overridden = "override";
+		List<String> argsWithOverride = new ArrayList<>(Arrays.asList(mockArgs));
+		argsWithOverride.add("--url");
+		argsWithOverride.add(overridden);
+		main(argsWithOverride.toArray(new String[0]));
 
-		assertEquals(overriddenName, configuration.getUsername());
+		assertEquals(overridden, configuration.getBaseUrl());
 	}
 
 	private void main(String... args) {
 		configuration = new Configuration();
-		new JCommander(configuration, args);
+		JCommander jc = new JCommander();
+		jc.setDefaultProvider(Configuration.ENVIRONMENT_DEFAULTS);
+		jc.addObject(configuration);
+		jc.parse(args);
 	}
 }

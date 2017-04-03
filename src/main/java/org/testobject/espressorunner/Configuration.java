@@ -1,9 +1,6 @@
 package org.testobject.espressorunner;
 
-import com.beust.jcommander.IParameterValidator;
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParameterException;
-import com.beust.jcommander.Strings;
+import com.beust.jcommander.*;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -13,34 +10,34 @@ import java.util.List;
 class Configuration {
 
 	@Parameter(names = {"--help", "-h", "-?"}, description = "Displays details on usage", help = true)
-	private boolean help = false;
+	private boolean help;
 
 	@Parameter(names = "--verbosity", description = "Logging level.")
-	private String verbosity = getEnvDefault("VERBOSITY", "INFO");
+	private String verbosity;
 
-	@Parameter(names = "--app", description = "Path to APK of app under test", validateWith = RequiredValidator.class)
-	private String appApk = getEnvDefault("APP");
+	@Parameter(names = "--app", description = "Path to APK of app under test", required = true)
+	private String appApk;
 
-	@Parameter(names = "--test", description = "Path to test APK", validateWith = RequiredValidator.class)
-	private String testApk = getEnvDefault("TEST");
+	@Parameter(names = "--test", description = "Path to test APK", required = true)
+	private String testApk;
 
 	@Parameter(names = "--url", description = "URL of TestObject API endpoint")
-	private String baseUrl = getEnvDefault("URL", "https://app.testobject.com/api/rest");
+	private String baseUrl;
 
-	@Parameter(names = "--username", description = "Your TestObject username", validateWith = RequiredValidator.class)
-	private String username = getEnvDefault("USER_NAME");
+	@Parameter(names = "--username", description = "Your TestObject username", required = true)
+	private String username;
 
-	@Parameter(names = "--password", description = "Your TestObject password", validateWith = RequiredValidator.class)
-	private String password = getEnvDefault("PASSWORD");
+	@Parameter(names = "--password", description = "Your TestObject password", required = true)
+	private String password;
 
 	@Parameter(names = "--team", description = "Your TestObject team")
-	private String team = getEnvDefault("TEAM");
+	private String team;
 
-	@Parameter(names = "--project", description = "Your TestObject project", validateWith = RequiredValidator.class)
-	private String project = getEnvDefault("PROJECT");
+	@Parameter(names = "--project", description = "Your TestObject project", required = true)
+	private String project;
 
-	@Parameter(names = "--suite", description = "ID of your Espresso suite within your project", validateWith = RequiredValidator.class)
-	private Long testSuite = getEnvDefaultLong("SUITE");
+	@Parameter(names = "--suite", description = "ID of your Espresso suite within your project", required = true)
+	private Long testSuite;
 
 	@Parameter(names = "--testsToRun", description = "Individual tests to run", variableArity = true)
 	private List<String> tests;
@@ -55,42 +52,22 @@ class Configuration {
 	private List<String> sizes;
 
 	@Parameter(names = "--timeout", description = "Test timeout in minutes")
-	private int testTimeout = Integer.parseInt(getEnvDefault("TIMEOUT", "60"));
+	private int testTimeout;
 
 	@Parameter(names = "--checkFrequency", description = "Interval in seconds to check test results")
-	private int checkFrequency = Integer.parseInt(getEnvDefault("CHECK_FREQUENCY", "30"));
+	private int checkFrequency;
 
 	@Parameter(names = "--failOnUnknown")
-	private boolean failOnUnknown = Boolean.parseBoolean(getEnvDefault("FAIL_ON_UNKNOWN", "false"));
+	private boolean failOnUnknown;
 
 	@Parameter(names = "--failOnError")
-	private boolean failOnError = Boolean.parseBoolean(getEnvDefault("FAIL_ON_ERROR", "false"));
+	private boolean failOnError;
 
 	@Parameter(names = "--runAsPackage")
-	private boolean runAsPackage = Boolean.parseBoolean(getEnvDefault("RUN_AS_PACKAGE", "false"));
+	private boolean runAsPackage;
 
 	@Parameter(names = "--xmlFolder", description = "Folder where XML test results will be located")
-	private String outputXml = getEnvDefault("xmlFolder", ".");
-
-	String getEnvDefault(String option, String fallback) {
-		String value = System.getenv(option);
-		return Strings.isStringEmpty(value) ? fallback : value;
-	}
-
-	String getEnvDefault(String option) {
-		return getEnvDefault(option, null);
-	}
-
-	/**
-	 * Given the name of an environment variable, reads the value for it, and either returns null if it doesn't exist or returns the value
-	 * converted to a Long
-	 * @param option Name of the environment variable
-	 * @return The value for the environment variable or null if none exists
-	 */
-	private Long getEnvDefaultLong(String option) {
-		String value = getEnvDefault(option, null);
-		return value == null ? null : Long.parseLong(value);
-	}
+	private String outputXml;
 
 	public String getBaseUrl() {
 		return baseUrl;
@@ -172,11 +149,61 @@ class Configuration {
 		return help;
 	}
 
-	public static class RequiredValidator implements IParameterValidator {
-		public void validate(String name, String value) throws ParameterException {
-			if (Strings.isStringEmpty(value)) {
-				throw new ParameterException("Missing value for parameter " + name);
+	static IDefaultProvider ENVIRONMENT_DEFAULTS = new IDefaultProvider() {
+
+		private String getEnvDefault(String option, String fallback) {
+			String value = System.getenv(option);
+			return Strings.isStringEmpty(value) ? fallback : value;
+		}
+
+		private String getEnvDefault(String option) {
+			return getEnvDefault(option, null);
+		}
+
+		@Override
+		public String getDefaultValueFor(String option) {
+			switch (option) {
+			case "--verbosity":
+				return getEnvDefault("VERBOSITY", "INFO");
+			case "--app":
+				return getEnvDefault("APP");
+			case "--test":
+				return getEnvDefault("TEST");
+			case "--url":
+				return getEnvDefault("URL", "https://app.testobject.com/api/rest");
+			case "--username":
+				return getEnvDefault("USER_NAME");
+			case "--password":
+				return getEnvDefault("PASSWORD");
+			case "--team":
+				return getEnvDefault("TEAM");
+			case "--project":
+				return getEnvDefault("PROJECT");
+			case "--suite":
+				return getEnvDefault("SUITE");
+			case "--testsToRun":
+				return getEnvDefault("TESTS_TO_RUN");
+			case "--classesToRun":
+				return getEnvDefault("CLASSES_TO_RUN");
+			case "--annotationsToRun":
+				return getEnvDefault("ANNOTATIONS_TO_RUN");
+			case "--sizesToRun":
+				return getEnvDefault("SIZES_TO_RUN");
+			case "--timeout":
+				return getEnvDefault("TIMEOUT", "60");
+			case "--checkFrequency":
+				return getEnvDefault("CHECK_FREQUENCY", "30");
+			case "--failOnUnknown":
+				return getEnvDefault("FAIL_ON_UNKNOWN");
+			case "--failOnError":
+				return getEnvDefault("FAIL_ON_ERROR");
+			case "--runAsPackage":
+				return getEnvDefault("RUN_AS_PACKAGE");
+			case "--xmlFolder":
+				return getEnvDefault("xmlFolder", ".");
+			default:
+				return null;
 			}
 		}
-	}
+	};
 }
