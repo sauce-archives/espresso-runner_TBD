@@ -4,7 +4,12 @@ A tool to upload and run Espresso/Robotium tests on the Sauce Labs real device p
 
 ## Usage
 
-Arguments can be provided with environment variables, or command line parameters (which take precedence):
+Arguments can be provided with environment variables:
+```
+APP=path/to/app.apk TEST=/path/to/test.apk USER_NAME=user PASSWORD=pass PROJECT=project SUITE=1 java -jar espresso-runner.jar
+```
+
+Or from command line parameters (which take precedence):
 
 ```
 java -jar espresso-runner.jar \
@@ -14,6 +19,11 @@ java -jar espresso-runner.jar \
     --password testObjectPassword \
     --project projectName \
     --suite 1
+```
+
+Or from a file:
+```
+java -jar espresso-runner.jar @/parameters.txt
 ```
 
 For additional options, try `java -jar espressorunner.jar --help`.
