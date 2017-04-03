@@ -60,9 +60,8 @@ class ConfigurationTest {
 
 	private void main(String... args) {
 		configuration = new Configuration();
-		JCommander jc = new JCommander();
+		JCommander jc = new JCommander(configuration);
 		jc.setDefaultProvider(Configuration.ENVIRONMENT_DEFAULTS);
-		jc.addObject(configuration);
 		jc.parse(args);
 	}
 }

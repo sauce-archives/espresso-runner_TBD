@@ -11,17 +11,16 @@ public class Main {
 
     public static void main(String... args) {
         Configuration config = new Configuration();
-        JCommander jc = new JCommander();
+        JCommander jc = new JCommander(config);
         jc.setDefaultProvider(Configuration.ENVIRONMENT_DEFAULTS);
         jc.setProgramName("espressorunner.jar");
-        jc.addObject(config);
         jc.parse(args);
-        setLogLevel(config.getVerbosity());
 
         if (config.getHelpRequested()) {
             jc.usage();
         } else {
-            try {
+			setLogLevel(config.getVerbosity());
+			try {
                 EspressoRunner espressoRunner = new EspressoRunner(config);
                 espressoRunner.executeTests();
             } catch (Throwable t) {

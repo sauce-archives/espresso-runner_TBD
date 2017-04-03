@@ -9,47 +9,44 @@ import java.util.List;
 
 class Configuration {
 
-	@Parameter(names = {"--help", "-h", "-?"}, description = "Displays details on usage", help = true)
+	@Parameter(names = "--app", description = "Path to APK of app under test", required = true, order = 0)
+	private String appApk;
+
+	@Parameter(names = "--test", description = "Path to test APK", required = true, order = 1)
+	private String testApk;
+
+	@Parameter(names = "--username", description = "Your TestObject username", required = true, order = 2)
+	private String username;
+
+	@Parameter(names = "--password", description = "Your TestObject password", required = true, order = 3)
+	private String password;
+
+	@Parameter(names = "--project", description = "Your TestObject project", required = true, order = 4)
+	private String project;
+
+	@Parameter(names = "--suite", description = "ID of your Espresso suite within your project", required = true, order = 5)
+	private Long testSuite;
+
+	@Parameter(names = "--testsToRun", description = "Individual tests to run", variableArity = true, order = 6)
+	private List<String> tests;
+
+	@Parameter(names = "--classesToRun", description = "Individual classes to run", variableArity = true, order = 7)
+	private List<String> classes;
+
+	@Parameter(names = "--annotationsToRun", description = "Individual annotations to run", variableArity = true, order = 8)
+	private List<String> annotations;
+
+	@Parameter(names = "--sizesToRun", description = "Test sizes to run", variableArity = true, order = 9)
+	private List<String> sizes;
+
+	@Parameter(names = {"--help", "-h", "-?"}, description = "Displays details on usage", help = true, order = 10)
 	private boolean help;
 
 	@Parameter(names = "--verbosity", description = "Logging level.")
 	private String verbosity;
 
-	@Parameter(names = "--app", description = "Path to APK of app under test", required = true)
-	private String appApk;
-
-	@Parameter(names = "--test", description = "Path to test APK", required = true)
-	private String testApk;
-
-	@Parameter(names = "--url", description = "URL of TestObject API endpoint")
-	private String baseUrl;
-
-	@Parameter(names = "--username", description = "Your TestObject username", required = true)
-	private String username;
-
-	@Parameter(names = "--password", description = "Your TestObject password", required = true)
-	private String password;
-
 	@Parameter(names = "--team", description = "Your TestObject team")
 	private String team;
-
-	@Parameter(names = "--project", description = "Your TestObject project", required = true)
-	private String project;
-
-	@Parameter(names = "--suite", description = "ID of your Espresso suite within your project", required = true)
-	private Long testSuite;
-
-	@Parameter(names = "--testsToRun", description = "Individual tests to run", variableArity = true)
-	private List<String> tests;
-
-	@Parameter(names = "--classesToRun", description = "Individual classes to run", variableArity = true)
-	private List<String> classes;
-
-	@Parameter(names = "--annotationsToRun", description = "Individual annotations to run", variableArity = true)
-	private List<String> annotations;
-
-	@Parameter(names = "--sizesToRun", description = "Test sizes to run", variableArity = true)
-	private List<String> sizes;
 
 	@Parameter(names = "--timeout", description = "Test timeout in minutes")
 	private int testTimeout;
@@ -57,17 +54,20 @@ class Configuration {
 	@Parameter(names = "--checkFrequency", description = "Interval in seconds to check test results")
 	private int checkFrequency;
 
-	@Parameter(names = "--failOnUnknown")
+	@Parameter(names = "--failOnUnknown", description = "Abort if an unknown error occurs")
 	private boolean failOnUnknown;
 
-	@Parameter(names = "--failOnError")
+	@Parameter(names = "--failOnError", description = "Abort if a test failure occurs")
 	private boolean failOnError;
 
-	@Parameter(names = "--runAsPackage")
+	@Parameter(names = "--runAsPackage", description = "Runs the test APK without any configuration")
 	private boolean runAsPackage;
 
 	@Parameter(names = "--xmlFolder", description = "Folder where XML test results will be located")
 	private String outputXml;
+
+	@Parameter(names = "--url", description = "URL of TestObject API endpoint")
+	private String baseUrl;
 
 	public String getBaseUrl() {
 		return baseUrl;
