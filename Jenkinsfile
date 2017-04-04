@@ -13,16 +13,20 @@ pipeline {
       steps {
         sh 'mvn package'
       }
-      always {
-        junit '**/build/test-reports/*.xml'
+      post {
+        always {
+          junit '**/build/test-reports/*.xml'
+        }
       }
     }
     stage("Run test"){
       steps {
         sh 'java -jar espresso-runner.jar'
       }
-      always {
-        junit '*.xml'
+      post {
+        always {
+          junit '*.xml'
+        }
       }
     }
   }
