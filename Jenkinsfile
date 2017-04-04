@@ -10,12 +10,15 @@ pipeline {
       }
     }
     stage("Build") {
+      environment {
+        MAVEN_OPTS=-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+      }
       steps {
-        sh 'mvn package'
+        sh 'mvn --batch-mode package'
       }
       post {
         always {
-          junit '**/build/test-reports/*.xml'
+          junit '**/surefire-reports/*.xml'
         }
       }
     }
