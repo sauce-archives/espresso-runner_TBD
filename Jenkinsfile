@@ -37,6 +37,9 @@ pipeline {
         sh 'java -jar $(ls target/espressorunner*jar)'
       }
       post {
+        failure {
+          sh 'env'
+        }
         always {
           junit '*.xml'
         }
