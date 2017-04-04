@@ -3,19 +3,18 @@ pipeline {
     docker 'maven:3.3.9'
   }
   environment {
-    APP=app.apk
-    TEST=test.apk
+    APP='app.apk'
+    TEST='test.apk'
   }
   parameters {
     string(defaultValue: '1', description: '', name: 'SUITE')
     string(defaultValue: 'testobject', description: '', name: 'USER_NAME')
-    string(defaultValue: '', description: '', name: 'PASSWORD')
     string(defaultValue: 'espresso-runner-test', description: '', name: 'PROJECT')
   }
   stages {
     stage("Get APKs") {
       steps {
-        sh 'wget -O $APP https://github.com/moizjv/spoon-samples/raw/master/espresso-sample/app-debug.apk'
+        sh 'wget -O ${env.APP} https://github.com/moizjv/spoon-samples/raw/master/espresso-sample/app-debug.apk'
         sh 'wget -O $TEST https://github.com/moizjv/spoon-samples/raw/master/espresso-sample/app-debug-androidTest-unaligned.apk'
       }
     }
@@ -33,6 +32,12 @@ pipeline {
       }
     }
     stage("Run test"){
+      environment {
+        SUITE=params.SUITE
+        USER_NAME=params.USER_NAME
+        PASSWORD=params.PASSWORD
+        PROJECT=params.PROJECT
+      }
       steps {
         sh 'java -jar $(ls target/espressorunner*jar)'
       }
