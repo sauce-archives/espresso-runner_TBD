@@ -9,7 +9,7 @@ pipeline {
   stages {
     stage("Get APKs") {
       steps {
-        sh 'wget -O ${env.APP} https://github.com/moizjv/spoon-samples/raw/master/espresso-sample/app-debug.apk'
+        sh 'wget -O $APP https://github.com/moizjv/spoon-samples/raw/master/espresso-sample/app-debug.apk'
         sh 'wget -O $TEST https://github.com/moizjv/spoon-samples/raw/master/espresso-sample/app-debug-androidTest-unaligned.apk'
       }
     }
