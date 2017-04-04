@@ -11,7 +11,7 @@ pipeline {
     }
     stage("Build") {
       environment {
-        MAVEN_OPTS=-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+        MAVEN_OPTS="-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
       }
       steps {
         sh 'mvn --batch-mode package'
