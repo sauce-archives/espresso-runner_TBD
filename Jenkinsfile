@@ -24,7 +24,7 @@ pipeline {
     }
     stage("Run test"){
       steps {
-        sh 'java -jar espresso-runner.jar'
+        sh 'java -jar $(ls target/espressorunner*jar)'
       }
       post {
         always {
