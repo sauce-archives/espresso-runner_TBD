@@ -7,9 +7,9 @@ pipeline {
     TEST=test.apk
   }
   parameters {
-    string(defaultValue: '1', description: '', name: 'SUITE'),
-    string(defaultValue: 'testobject', description: '', name: 'USER_NAME'),
-    string(defaultValue: '', description: '', name: 'PASSWORD'),
+    string(defaultValue: '1', description: '', name: 'SUITE')
+    string(defaultValue: 'testobject', description: '', name: 'USER_NAME')
+    string(defaultValue: '', description: '', name: 'PASSWORD')
     string(defaultValue: 'espresso-runner-test', description: '', name: 'PROJECT')
   }
   stages {
