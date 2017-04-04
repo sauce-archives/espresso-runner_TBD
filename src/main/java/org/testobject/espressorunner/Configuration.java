@@ -149,9 +149,9 @@ class Configuration {
 		return help;
 	}
 
-	static IDefaultProvider ENVIRONMENT_DEFAULTS = new IDefaultProvider() {
+	static class EnvironmentDefaultProvider implements IDefaultProvider {
 
-		private String getEnvDefault(String option, String fallback) {
+		String getEnvDefault(String option, String fallback) {
 			String value = System.getenv(option);
 			return Strings.isStringEmpty(value) ? fallback : value;
 		}

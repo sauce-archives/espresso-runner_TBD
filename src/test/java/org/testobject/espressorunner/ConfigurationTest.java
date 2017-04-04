@@ -1,18 +1,18 @@
 package org.testobject.espressorunner;
 
+import com.beust.jcommander.IDefaultProvider;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ConfigurationTest {
 	private Configuration configuration;
+	private IDefaultProvider defaults;
 
 	private String mockTest = "test";
 	private String mockApp = "app";
@@ -44,7 +44,7 @@ class ConfigurationTest {
 	void testDefault() {
 		main(mockArgs);
 
-		assertEquals(Configuration.ENVIRONMENT_DEFAULTS.getDefaultValueFor("--url"), configuration.getBaseUrl());
+		assertEquals(defaults.getDefaultValueFor("--url"), configuration.getBaseUrl());
 	}
 
 	@Test
@@ -58,10 +58,20 @@ class ConfigurationTest {
 		assertEquals(overridden, configuration.getBaseUrl());
 	}
 
-	private void main(String... args) {
+	private void main(String ... args) {
+		main(new HashMap<>(), args);
+	}
+
+	private void main(Map<String, String> environmentVariables, String... args) {
 		configuration = new Configuration();
+		defaults = new Configuration.EnvironmentDefaultProvider() {
+			@Override
+			String getEnvDefault(String option, String fallback) {
+				return environmentVariables.getOrDefault(option, fallback);
+			}
+		};
 		JCommander jc = new JCommander(configuration);
-		jc.setDefaultProvider(Configuration.ENVIRONMENT_DEFAULTS);
+		jc.setDefaultProvider(defaults);
 		jc.parse(args);
 	}
 }

@@ -12,7 +12,7 @@ public class Main {
     public static void main(String... args) {
         Configuration config = new Configuration();
         JCommander jc = new JCommander(config);
-        jc.setDefaultProvider(Configuration.ENVIRONMENT_DEFAULTS);
+        jc.setDefaultProvider(new Configuration.EnvironmentDefaultProvider());
         jc.setProgramName("espressorunner.jar");
         jc.parse(args);
 
