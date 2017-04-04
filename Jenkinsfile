@@ -6,16 +6,12 @@ pipeline {
     APP=app.apk
     TEST=test.apk
   }
-  properties(
-    [
-      parameters([
-        string(defaultValue: '1', description: '', name: 'SUITE'),
-        string(defaultValue: 'testobject', description: '', name: 'USER_NAME'),
-        string(defaultValue: '', description: '', name: 'PASSWORD'),
-        string(defaultValue: 'espresso-runner-test', description: '', name: 'PROJECT')
-      ])
-    ]
-  )
+  parameters {
+    string(defaultValue: '1', description: '', name: 'SUITE'),
+    string(defaultValue: 'testobject', description: '', name: 'USER_NAME'),
+    string(defaultValue: '', description: '', name: 'PASSWORD'),
+    string(defaultValue: 'espresso-runner-test', description: '', name: 'PROJECT')
+  }
   stages {
     stage("Get APKs") {
       steps {
