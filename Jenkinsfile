@@ -10,21 +10,19 @@ pipeline {
       }
     }
     stage("Build") {
-        steps {
-          try {
-            sh 'mvn package'
-          } finally {
-            junit '**/build/test-reports/*.xml'
-          }
-        }
+      steps {
+        sh 'mvn package'
+      }
+      always {
+        junit '**/build/test-reports/*.xml'
+      }
     }
     stage("Run test"){
       steps {
-        try {
-          sh 'java -jar espresso-runner.jar'
-        } finally {
-          junit '*.xml'
-        }
+        sh 'java -jar espresso-runner.jar'
+      }
+      always {
+        junit '*.xml'
       }
     }
   }
