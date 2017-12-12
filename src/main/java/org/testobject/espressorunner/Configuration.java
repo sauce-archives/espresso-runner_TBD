@@ -69,6 +69,13 @@ class Configuration {
 	@Parameter(names = "--url", description = "URL of TestObject API endpoint")
 	private String baseUrl;
 
+	@Parameter(names = "--tunnelIdentifier", description = "Sauce Connect tunnel identifier")
+	private String tunnelIdentifier;
+
+	public String getTunnelIdentifier() {
+		return tunnelIdentifier;
+	}
+
 	public String getBaseUrl() {
 		return baseUrl;
 	}
