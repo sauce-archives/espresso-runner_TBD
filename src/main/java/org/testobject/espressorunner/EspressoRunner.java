@@ -112,6 +112,7 @@ class EspressoRunner {
 		request.annotationsToRun = config.getAnnotations();
 		request.classesToRun = config.getClasses();
 		request.sizesToRun = config.getSizes();
+		request.tunnelIdentifier = config.getTunnelIdentifier();
 
 		log.debug("InstrumentationTestSuiteRequest created: " + gson.toJson(request));
 
