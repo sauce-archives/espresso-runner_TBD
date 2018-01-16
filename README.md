@@ -77,6 +77,8 @@ Usage: espressorunner.jar [options]
       Logging level.
     --xmlFolder
       Folder where XML test results will be located
+    --tunnelIdentifier
+      Sauce Connect tunnel identifier
 ```
 
 ## Building

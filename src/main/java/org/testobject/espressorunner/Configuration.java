@@ -208,6 +208,8 @@ class Configuration {
 				return getEnvDefault("RUN_AS_PACKAGE");
 			case "--xmlFolder":
 				return getEnvDefault("xmlFolder", ".");
+			case "--tunnelIdentifier":
+				return getEnvDefault("TUNNEL_IDENTIFIER", ".");
 			default:
 				return null;
 			}
