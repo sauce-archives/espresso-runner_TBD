@@ -209,7 +209,7 @@ class Configuration {
 			case "--xmlFolder":
 				return getEnvDefault("xmlFolder", ".");
 			case "--tunnelIdentifier":
-				return getEnvDefault("TUNNEL_IDENTIFIER", ".");
+				return getEnvDefault("TUNNEL_IDENTIFIER");
 			default:
 				return null;
 			}
