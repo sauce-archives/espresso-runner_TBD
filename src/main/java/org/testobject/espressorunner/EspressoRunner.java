@@ -33,7 +33,7 @@ class EspressoRunner {
 	void executeTests() throws TestFailedException {
 		TestObjectClient client = createClient();
 		TestSuiteResource.InstrumentationTestSuiteRequest instrumentationTestSuiteRequest = createSuiteRequest();
-		login(client, config.getUsername(), config.getPassword());
+		login(client, config.getUsername(), config.getPassword(), config.getApiKey());
 		updateInstrumentationSuite(client, instrumentationTestSuiteRequest);
 
 		Instant start = Instant.now();
@@ -130,13 +130,17 @@ class EspressoRunner {
 		log.info("Wrote XML report to '" + xmlFile + "'");
 	}
 
-	private void login(TestObjectClient client, String user, String password) {
+	private void login(TestObjectClient client, String user, String password, String apiKey) {
 		try {
-			client.login(user, password);
-			log.info("User " + user + " successfully logged in");
+			if (apiKey != null) {
+				client.loginWithApiKey(apiKey);
+			} else {
+				client.login(user, password);
+			}
 		} catch (Exception e) {
 			throw new RuntimeException(String.format("Unable to login user %s", user), e);
 		}
+		log.info("User " + user + " successfully logged in");
 	}
 
 	private void updateInstrumentationSuite(TestObjectClient client, TestSuiteResource.InstrumentationTestSuiteRequest request) {

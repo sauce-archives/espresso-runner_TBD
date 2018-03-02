@@ -15,10 +15,10 @@ class Configuration {
 	@Parameter(names = "--test", description = "Path to test APK", required = true, order = 1)
 	private String testApk;
 
-	@Parameter(names = "--username", description = "Your TestObject username", required = true, order = 2)
+	@Parameter(names = "--username", description = "Your TestObject username", order = 2)
 	private String username;
 
-	@Parameter(names = "--password", description = "Your TestObject password", required = true, order = 3)
+	@Parameter(names = "--password", description = "Your TestObject password", order = 3)
 	private String password;
 
 	@Parameter(names = "--project", description = "Your TestObject project", required = true, order = 4)
@@ -71,6 +71,13 @@ class Configuration {
 
 	@Parameter(names = "--tunnelIdentifier", description = "Sauce Connect tunnel identifier")
 	private String tunnelIdentifier;
+
+	@Parameter(names = "--apiKey", description = "Your TestObject user API Key")
+	private String apiKey;
+
+	public String getApiKey() {
+		return apiKey;
+	}
 
 	public String getTunnelIdentifier() {
 		return tunnelIdentifier;
@@ -210,6 +217,8 @@ class Configuration {
 				return getEnvDefault("xmlFolder", ".");
 			case "--tunnelIdentifier":
 				return getEnvDefault("TUNNEL_IDENTIFIER");
+			case "--apiKey":
+				return getEnvDefault("API_KEY");
 			default:
 				return null;
 			}
