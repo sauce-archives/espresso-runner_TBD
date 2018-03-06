@@ -38,8 +38,10 @@ Usage: espressorunner.jar [options]
       Path to test APK
   * --username
       Your TestObject username
-  * --password
+    --password
       Your TestObject password
+    --apiKey
+      Your TestObject user API key
   * --project
       Your TestObject project
   * --suite

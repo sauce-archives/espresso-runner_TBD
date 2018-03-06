@@ -15,7 +15,7 @@ class Configuration {
 	@Parameter(names = "--test", description = "Path to test APK", required = true, order = 1)
 	private String testApk;
 
-	@Parameter(names = "--username", description = "Your TestObject username", order = 2)
+	@Parameter(names = "--username", description = "Your TestObject username", required = true, order = 2)
 	private String username;
 
 	@Parameter(names = "--password", description = "Your TestObject password", order = 3)
