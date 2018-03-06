@@ -4,7 +4,7 @@
 
   <groupId>org.testobject</groupId>
   <artifactId>espressorunner</artifactId>
-  <version>0.2.1-SNAPSHOT</version>
+  <version>0.2.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>espressorunner</name>
