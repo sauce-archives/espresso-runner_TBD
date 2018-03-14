@@ -4,9 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testobject.api.TestObjectClient;
+import org.testobject.api.v2.TestObjectClientV2;
 import org.testobject.rest.api.model.TestSuiteReport;
-import org.testobject.rest.api.resource.TestSuiteResource;
+import org.testobject.rest.api.resource.v2.TestSuiteResourceV2;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,9 +31,8 @@ class EspressoRunner {
 	}
 
 	void executeTests() throws TestFailedException {
-		TestObjectClient client = createClient();
-		TestSuiteResource.InstrumentationTestSuiteRequest instrumentationTestSuiteRequest = createSuiteRequest();
-		login(client, config.getUsername(), config.getPassword());
+		TestObjectClientV2 client = createClient();
+		TestSuiteResourceV2.InstrumentationTestSuiteRequest instrumentationTestSuiteRequest = createSuiteRequest();
 		updateInstrumentationSuite(client, instrumentationTestSuiteRequest);
 
 		Instant start = Instant.now();
@@ -83,30 +82,28 @@ class EspressoRunner {
 		return msg.toString();
 	}
 
-	private TestSuiteReport runTests(TestObjectClient client) {
-		String team = config.getTeam();
-		String project = config.getProject();
-		Long testSuite = config.getTestSuite();
-		long suiteReportId = client.startInstrumentationTestSuite(team, project, testSuite);
+	private TestSuiteReport runTests(TestObjectClientV2 client) {
+
+		long suiteReportId = client.startInstrumentationTestSuite(config.getTestSuite(), config.getApiKey());
 		TestSuiteReport suiteReport = client
-				.waitForSuiteReport(team, project, suiteReportId, TimeUnit.MINUTES.toMillis(config.getTestTimeout()),
-						TimeUnit.SECONDS.toMillis(config.getCheckFrequency()));
+				.waitForSuiteReport(suiteReportId, TimeUnit.MINUTES.toMillis(config.getTestTimeout()),
+						TimeUnit.SECONDS.toMillis(config.getCheckFrequency()), config.getApiKey());
 		try {
-			writeSuiteReportXML(client, team, project, suiteReportId);
+			writeSuiteReportXML(client, config.getTeam(), config.getProject(), suiteReportId);
 		} catch (IOException e) {
 			log.warn("Failed to write test report to XML", e);
 		}
 		return suiteReport;
 	}
 
-	private TestObjectClient createClient() {
-		TestObjectClient.ProxySettings proxySettings = getProxySettings();
+	private TestObjectClientV2 createClient() {
+		TestObjectClientV2.ProxySettings proxySettings = getProxySettings();
 		String baseUrl = config.getBaseUrl();
-		return TestObjectClient.Factory.create(baseUrl, proxySettings);
+		return TestObjectClientV2.Factory.create(baseUrl, proxySettings);
 	}
 
-	private TestSuiteResource.InstrumentationTestSuiteRequest createSuiteRequest() {
-		TestSuiteResource.InstrumentationTestSuiteRequest request = new TestSuiteResource.InstrumentationTestSuiteRequest(
+	private TestSuiteResourceV2.InstrumentationTestSuiteRequest createSuiteRequest() {
+		TestSuiteResourceV2.InstrumentationTestSuiteRequest request = new TestSuiteResourceV2.InstrumentationTestSuiteRequest(
 				config.getRunAsPackage());
 		request.methodsToRun = config.getTests();
 		request.annotationsToRun = config.getAnnotations();
@@ -119,34 +116,25 @@ class EspressoRunner {
 		return request;
 	}
 
-	private void writeSuiteReportXML(TestObjectClient client, String user, String app, long suiteReportId) throws IOException {
+	private void writeSuiteReportXML(TestObjectClientV2 client, String user, String project, long suiteReportId) throws IOException {
 		Path xmlFolder = config.getXmlFolder();
 
-		String filename = user + "-" + app + "-" + suiteReportId + ".xml";
-		String xml = client.readTestSuiteXMLReport(user, app, suiteReportId);
+		String filename = user + "-" + project + "-" + suiteReportId + ".xml";
+		String xml = client.readTestSuiteXMLReport(suiteReportId, config.getApiKey());
 		Files.createDirectories(xmlFolder);
 
 		Path xmlFile = Files.write(xmlFolder.resolve(filename), xml.getBytes());
 		log.info("Wrote XML report to '" + xmlFile + "'");
 	}
 
-	private void login(TestObjectClient client, String user, String password) {
-		try {
-			client.login(user, password);
-			log.info("User " + user + " successfully logged in");
-		} catch (Exception e) {
-			throw new RuntimeException(String.format("Unable to login user %s", user), e);
-		}
-	}
-
-	private void updateInstrumentationSuite(TestObjectClient client, TestSuiteResource.InstrumentationTestSuiteRequest request) {
+	private void updateInstrumentationSuite(TestObjectClientV2 client, TestSuiteResourceV2.InstrumentationTestSuiteRequest request) {
 		File testApk = config.getTestApk();
 		File appApk = config.getAppApk();
-		String team = config.getTeam();
 		Long testSuite = config.getTestSuite();
-		String project = config.getProject();
+		String apiKey = config.getApiKey();
+
 		try {
-			client.updateInstrumentationTestSuite(team, project, testSuite, appApk, testApk, request);
+			client.updateInstrumentationTestSuite(testSuite, appApk, testApk, request, apiKey);
 			log.info(String.format("Uploaded appAPK : %s and testAPK : %s", appApk.getAbsolutePath(), testApk.getAbsolutePath()));
 		} catch (Exception e) {
 			throw new RuntimeException("Unable to update testSuite %s" + testSuite, e);
@@ -205,13 +193,13 @@ class EspressoRunner {
 		return "";
 	}
 
-	private static TestObjectClient.ProxySettings getProxySettings() {
+	private static TestObjectClientV2.ProxySettings getProxySettings() {
 		String proxyHost = System.getProperty("http.proxyHost");
 		String proxyPort = System.getProperty("http.proxyPort");
 		String proxyUser = System.getProperty("http.proxyUser");
 		String proxyPassword = System.getProperty("http.proxyPassword");
 
-		return proxyHost != null ? new TestObjectClient.ProxySettings(proxyHost, Integer.parseInt(proxyPort), proxyUser, proxyPassword)
+		return proxyHost != null ? new TestObjectClientV2.ProxySettings(proxyHost, Integer.parseInt(proxyPort), proxyUser, proxyPassword)
 				: null;
 	}
 
