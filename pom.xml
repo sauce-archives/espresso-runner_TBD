@@ -4,7 +4,7 @@
 
   <groupId>org.testobject</groupId>
   <artifactId>espressorunner</artifactId>
-  <version>0.2.1-SNAPSHOT</version>
+  <version>0.3.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>espressorunner</name>
@@ -71,7 +71,7 @@
     <dependency>
       <groupId>org.testobject</groupId>
       <artifactId>testobject-java-api</artifactId>
-      <version>0.1.4</version>
+      <version>0.1.6</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.gson</groupId>

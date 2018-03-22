@@ -30,7 +30,7 @@ pipeline {
       environment {
         SUITE=params.SUITE
         USER_NAME=params.USER_NAME
-        PASSWORD=params.PASSWORD
+        API_KEY=params.API_KEY
         PROJECT=params.PROJECT
       }
       steps {
